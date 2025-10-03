@@ -1,0 +1,23 @@
+version: "3.8"
+
+services:
+  ollama:
+    image: ollama/ollama
+    container_name: ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama  # persist models
+
+  node-api:
+    build: ./node-api
+    container_name: node-api
+    ports:
+      - "3000:3000"
+    environment:
+      - API_KEY=${API_KEY}
+    depends_on:
+      - ollama
+
+volumes:
+  ollama_data:
