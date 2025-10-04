@@ -141,3 +141,6 @@ vite.config.ts.timestamp-*
 # test_api.sh
 test_api.sh
 test_api.py
+
+test_stream.sh
+test_stream.py

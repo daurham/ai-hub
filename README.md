@@ -182,6 +182,15 @@ curl -X POST http://localhost:3000/api/ai \
   -d '{"query": "Explain quantum computing"}'
 ```
 
+#### 4. Streaming AI (Real-time response)
+```bash
+curl -X POST http://localhost:3000/api/ai/stream \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: your-api-key" \
+  -d '{"query": "Explain quantum computing"}' \
+  --no-buffer
+```
+
 ### JavaScript Examples
 
 #### 1. Nutrition Analysis
@@ -268,6 +277,54 @@ const aiResponse = await axios.post('http://localhost:3000/api/ai', {
   }
 });
 console.log(aiResponse.data.result);
+```
+
+#### 4. Streaming AI (Real-time response)
+```javascript
+const response = await fetch('http://localhost:3000/api/ai/stream', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'x-api-key': 'your-api-key'
+  },
+  body: JSON.stringify({
+    query: 'Explain quantum computing'
+  })
+});
+
+// Handle streaming response
+const reader = response.body.getReader();
+const decoder = new TextDecoder();
+
+while (true) {
+  const { done, value } = await reader.read();
+  if (done) break;
+  
+  const chunk = decoder.decode(value);
+  process.stdout.write(chunk); // Print each chunk as it arrives
+}
+```
+
+#### Using Axios for Streaming
+```javascript
+import axios from 'axios';
+
+const response = await axios.post('http://localhost:3000/api/ai/stream', {
+  query: 'Explain quantum computing'
+}, {
+  headers: {
+    'x-api-key': 'your-api-key'
+  },
+  responseType: 'stream'
+});
+
+response.data.on('data', (chunk) => {
+  process.stdout.write(chunk.toString());
+});
+
+response.data.on('end', () => {
+  console.log('\nStream completed');
+});
 ```
 
 ## 🔍 Troubleshooting

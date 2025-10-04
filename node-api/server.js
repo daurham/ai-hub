@@ -89,11 +89,49 @@ app.post("/api/ai", authenticate, async (req, res) => {
 app.post("/api/ai/stream", authenticate, async (req, res) => {
   const { query } = req.body;
   try {
+    // Set headers for streaming response
+    res.setHeader('Content-Type', 'text/plain');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    
     const response = await axios.post(OLLAMA_URL, {
       model: GENERIC_MODEL,
       prompt: query,
       stream: true
+    }, {
+      responseType: 'stream'
     });
+
+    // Stream the response from Ollama to the client
+    response.data.on('data', (chunk) => {
+      try {
+        const lines = chunk.toString().split('\n');
+        for (const line of lines) {
+          if (line.trim()) {
+            const data = JSON.parse(line);
+            if (data.response) {
+              res.write(data.response);
+            }
+            if (data.done) {
+              res.end();
+              return;
+            }
+          }
+        }
+      } catch (parseErr) {
+        console.error('Error parsing streaming response:', parseErr);
+      }
+    });
+
+    response.data.on('end', () => {
+      res.end();
+    });
+
+    response.data.on('error', (streamErr) => {
+      console.error('Stream error:', streamErr);
+      res.status(500).end('Stream error occurred');
+    });
+
   } catch (err) {
     console.error("Ollama request error:", err.message);
     console.error("Full error:", err);
