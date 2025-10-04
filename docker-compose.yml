@@ -1,23 +1,23 @@
-version: "3.8"
-
 services:
   ollama:
     image: ollama/ollama
-    container_name: ollama
+    container_name: home-ai-ollama
     ports:
       - "11434:11434"
     volumes:
-      - ollama_data:/root/.ollama  # persist models
+      - ollama_data:/root/.ollama
+    restart: unless-stopped
 
   node-api:
     build: ./node-api
-    container_name: node-api
+    container_name: home-ai-node-api
     ports:
       - "3000:3000"
-    environment:
-      - API_KEY=${API_KEY}
+    env_file:
+      - ./node-api/.env
     depends_on:
       - ollama
+    restart: unless-stopped
 
 volumes:
   ollama_data:

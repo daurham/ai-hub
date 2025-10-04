@@ -13,6 +13,7 @@ const API_KEY = process.env.API_KEY;
 const NUTRITION_MODEL = "mistral";
 const HOME_ASSISTANT_MODEL = "llama3";
 const GENERIC_MODEL = "llama3";
+const OLLAMA_URL = "http://home-ai-ollama:11434/api/generate";
 
 // Middleware for authentication
 function authenticate(req, res, next) {
@@ -27,20 +28,19 @@ function authenticate(req, res, next) {
 app.post("/api/nutrition", authenticate, async (req, res) => {
   const { query } = req.body;
   try {
-    const response = await axios.post("http://localhost:11434/api/generate", {
+    const response = await axios.post(OLLAMA_URL, {
       model: NUTRITION_MODEL,
       prompt: query,
+      stream: false
     });
 
-    let output = "";
-    for (const line of response.data.output) {
-      output += line.content;
-    }
+    const output = response.data.response;
 
     res.json({ result: output });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Ollama request failed" });
+    console.error("Ollama request error:", err.message);
+    console.error("Full error:", err);
+    res.status(500).json({ error: "Ollama request failed", details: err.message });
   }
 });
 
@@ -48,21 +48,20 @@ app.post("/api/nutrition", authenticate, async (req, res) => {
 app.post("/api/home-assistant", authenticate, async (req, res) => {
   const { message } = req.body;
   try {
-    const response = await axios.post("http://localhost:11434/api/generate", {
+    const response = await axios.post(OLLAMA_URL, {
       model: HOME_ASSISTANT_MODEL,
       prompt: `You are a helpful AI home assistant.
       User: ${message}`,
+      stream: false
     });
 
-    let output = "";
-    for (const line of response.data.output) {
-      output += line.content;
-    }
+    const output = response.data.response;
 
     res.json({ reply: output });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Ollama request failed" });
+    console.error("Ollama request error:", err.message);
+    console.error("Full error:", err);
+    res.status(500).json({ error: "Ollama request failed", details: err.message });
   }
 });
 
@@ -70,20 +69,35 @@ app.post("/api/home-assistant", authenticate, async (req, res) => {
 app.post("/api/ai", authenticate, async (req, res) => {
   const { query } = req.body;
   try {
-    const response = await axios.post("http://localhost:11434/api/generate", {
+    const response = await axios.post(OLLAMA_URL, {
       model: GENERIC_MODEL,
       prompt: query,
+      stream: false
     });
 
-    let output = "";
-    for (const line of response.data.output) {
-      output += line.content;
-    }
+    const output = response.data.response;
 
     res.json({ result: output });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Ollama request failed" });
+    console.error("Ollama request error:", err.message);
+    console.error("Full error:", err);
+    res.status(500).json({ error: "Ollama request failed", details: err.message });
+  }
+});
+
+// Generic Stream endpoint
+app.post("/api/ai/stream", authenticate, async (req, res) => {
+  const { query } = req.body;
+  try {
+    const response = await axios.post(OLLAMA_URL, {
+      model: GENERIC_MODEL,
+      prompt: query,
+      stream: true
+    });
+  } catch (err) {
+    console.error("Ollama request error:", err.message);
+    console.error("Full error:", err);
+    res.status(500).json({ error: "Ollama request failed", details: err.message });
   }
 });
 
