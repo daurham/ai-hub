@@ -10,6 +10,9 @@ app.use(cors());
 app.use(bodyParser.json());
 
 const API_KEY = process.env.API_KEY;
+const NUTRITION_MODEL = "mistral";
+const HOME_ASSISTANT_MODEL = "llama3";
+const GENERIC_MODEL = "llama3";
 
 // Middleware for authentication
 function authenticate(req, res, next) {
@@ -25,10 +28,8 @@ app.post("/api/nutrition", authenticate, async (req, res) => {
   const { query } = req.body;
   try {
     const response = await axios.post("http://localhost:11434/api/generate", {
-      model: "llama3",
-      prompt: `You are a nutrition parser. 
-      Input: "${query}"
-      Output ONLY valid JSON with calories, protein, carbs, and fat.`,
+      model: NUTRITION_MODEL,
+      prompt: query,
     });
 
     let output = "";
@@ -43,12 +44,12 @@ app.post("/api/nutrition", authenticate, async (req, res) => {
   }
 });
 
-// Assistant endpoint
-app.post("/api/assistant", authenticate, async (req, res) => {
+// Home Assistant endpoint
+app.post("/api/home-assistant", authenticate, async (req, res) => {
   const { message } = req.body;
   try {
     const response = await axios.post("http://localhost:11434/api/generate", {
-      model: "llama3",
+      model: HOME_ASSISTANT_MODEL,
       prompt: `You are a helpful AI home assistant.
       User: ${message}`,
     });
@@ -59,6 +60,27 @@ app.post("/api/assistant", authenticate, async (req, res) => {
     }
 
     res.json({ reply: output });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Ollama request failed" });
+  }
+});
+
+// Generic AI endpoint
+app.post("/api/ai", authenticate, async (req, res) => {
+  const { query } = req.body;
+  try {
+    const response = await axios.post("http://localhost:11434/api/generate", {
+      model: GENERIC_MODEL,
+      prompt: query,
+    });
+
+    let output = "";
+    for (const line of response.data.output) {
+      output += line.content;
+    }
+
+    res.json({ result: output });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Ollama request failed" });
