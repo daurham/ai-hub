@@ -64,6 +64,37 @@ python3 test_api.py
 
 ## 🔧 Management Commands
 
+### Development Scripts
+
+**Quick rebuild and restart (most common):**
+```bash
+./rebuild.sh
+```
+
+**Advanced development commands:**
+```bash
+# Rebuild with latest code changes
+./dev.sh rebuild
+
+# Just restart containers
+./dev.sh restart
+
+# Watch live logs
+./dev.sh logs
+
+# Run all tests
+./dev.sh test
+
+# Check service status
+./dev.sh status
+
+# Clean up Docker resources
+./dev.sh clean
+
+# Show help
+./dev.sh help
+```
+
 ### Docker Compose Management
 
 **Start the entire stack:**
