@@ -4,7 +4,7 @@ A Docker-based Home AI API server that provides intelligent responses using Olla
 
 ## 🚀 Features
 
-- **Nutrition Analysis** - Uses Mistral model for nutrition-related queries
+- **Nutrition Analysis** - Uses Ollama 3.2 Vision model for nutrition-related queries (supports text and images)
 - **Home Assistant** - Uses Llama3 for home automation commands
 - **Generic AI** - Uses Llama3 for general AI conversations
 - **Auto-start** - Automatically starts on system boot
@@ -38,7 +38,7 @@ A Docker-based Home AI API server that provides intelligent responses using Olla
 
 4. **Download AI models**
    ```bash
-   sudo docker exec home-ai-ollama ollama pull mistral
+   sudo docker exec home-ai-ollama ollama pull ollama3.2-vision:11b
    sudo docker exec home-ai-ollama ollama pull llama3
    ```
 
@@ -189,13 +189,15 @@ All endpoints require an API key in the `x-api-key` header.
 
 ### Endpoints
 
-#### 1. Nutrition Analysis
+#### 1. Nutrition Analysis (with Vision Support)
 ```bash
 curl -X POST http://localhost:3000/api/nutrition \
   -H "Content-Type: application/json" \
   -H "x-api-key: your-api-key" \
   -d '{"query": "What are the benefits of apples?"}'
 ```
+
+**Note:** The nutrition endpoint now uses Ollama 3.2 Vision model, which can analyze both text descriptions and images for nutrition analysis.
 
 #### 2. Home Assistant
 ```bash

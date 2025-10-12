@@ -10,9 +10,9 @@ app.use(cors());
 app.use(bodyParser.json());
 
 const API_KEY = process.env.API_KEY;
-const NUTRITION_MODEL = "mistral";
-const HOME_ASSISTANT_MODEL = "llama3";
-const GENERIC_MODEL = "llama3";
+const NUTRITION_MODEL = "llama3.2-vision:11b";
+const HOME_ASSISTANT_MODEL = "llama3.2-vision:11b";
+const GENERIC_MODEL = "llama3.2-vision:11b";
 const OLLAMA_URL = "http://home-ai-ollama:11434/api/generate";
 
 // Middleware for authentication
