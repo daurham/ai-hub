@@ -9,10 +9,23 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
+// Available models
+const LLM = {
+  llama3: "llama3",
+  llama3_2_vision: "llama3.2-vision:11b",
+  mistral: "mistral",
+
+  mistral_vision: "mistral-vision:7b", // not pulled
+  qwen: "qwen2.5-coder:14b", // not pulled
+  qwen_vision: "qwen2.5-coder-vision:14b", // not pulled
+  qwen_2_5_coder: "qwen2.5-coder:14b", // not pulled
+  qwen_2_5_coder_vision: "qwen2.5-coder-vision:14b", // not pulled
+};
+
 const API_KEY = process.env.API_KEY;
-const NUTRITION_MODEL = "llama3.2-vision:11b";
-const HOME_ASSISTANT_MODEL = "llama3.2-vision:11b";
-const GENERIC_MODEL = "llama3.2-vision:11b";
+const NUTRITION_MODEL = LLM.llama3_2_vision;
+const HOME_ASSISTANT_MODEL = LLM.llama3_2_vision;
+const GENERIC_MODEL = LLM.llama3_2_vision;
 const OLLAMA_URL = "http://home-ai-ollama:11434/api/generate";
 
 // Middleware for authentication
@@ -87,7 +100,14 @@ app.post("/api/ai", authenticate, async (req, res) => {
 
 // Generic Stream endpoint
 app.post("/api/ai/stream", authenticate, async (req, res) => {
-  const { query } = req.body;
+  const { query, system_prompt = "", character_name = "" } = req.body;
+
+  const prompt = `
+  ${system_prompt}
+  ${character_name}
+  ${query}
+  `;
+
   try {
     // Set headers for streaming response
     res.setHeader('Content-Type', 'text/plain');
@@ -96,7 +116,7 @@ app.post("/api/ai/stream", authenticate, async (req, res) => {
     
     const response = await axios.post(OLLAMA_URL, {
       model: GENERIC_MODEL,
-      prompt: query,
+      prompt: prompt,
       stream: true
     }, {
       responseType: 'stream'
